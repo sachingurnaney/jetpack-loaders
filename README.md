@@ -21,6 +21,21 @@ Includes multiple loader styles such as dots, rings, bars, wave, ripple, orbit, 
 
 Add the library to your Gradle dependencies:
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/sachingurnaney/jetpack-loaders")
+            credentials {
+                username = "<YOUR_GITHUB_USERNAME>"
+                password = "<YOUR_PERSONAL_ACCESS_TOKEN>"
+            }
+        }
+    }
+}
+
 ```kotlin
 dependencies {
     implementation("io.github.sachingurnaney:jetpack-loaders:1.0.0")
