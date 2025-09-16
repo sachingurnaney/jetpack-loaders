@@ -21,6 +21,10 @@ Includes multiple loader styles such as dots, rings, bars, wave, ripple, orbit, 
 
 Add the library to your Gradle dependencies:
 
+
+
+```kotlin
+// settings.gradle.kts
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -35,8 +39,7 @@ dependencyResolutionManagement {
         }
     }
 }
-
-```kotlin
+// build.gradle.kts
 dependencies {
     implementation("io.github.sachingurnaney:jetpack-loaders:1.0.0")
 }
