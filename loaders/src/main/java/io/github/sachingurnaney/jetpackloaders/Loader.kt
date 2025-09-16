@@ -1,10 +1,25 @@
 package io.github.sachingurnaney.jetpackloaders
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest.Builder
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 /**
  * Base configuration class for all loaders.
@@ -48,6 +63,32 @@ data class RingLoaderConfig(
 ) : BaseLoaderConfig(size, color, speed)
 
 /**
+ * Configuration for Custom Loader.
+ *
+ * Allows using Lottie animations, GIFs, or custom drawables.
+ *
+ * @property type Type of custom loader (Lottie, SVG, GIF).
+ * @property resource Any identifier (raw resource ID, URL, or painter).
+ */
+data class CustomLoaderConfig(
+    override val size: Dp = 48.dp,
+    override val color: Color = Color.Unspecified, // Not all types may use color
+    override val speed: Float = 1f,
+    val type: CustomLoaderType,
+    val resource: Any // e.g. rawResId, URL, or painter
+) : BaseLoaderConfig(size, color, speed)
+
+/**
+ * Supported custom loader types.
+ */
+enum class CustomLoaderType {
+    LOTTIE,
+    SVG,
+    GIF
+}
+
+
+/**
  * Predefined loader styles available in the library.
  */
 enum class LoaderStyle {
@@ -60,7 +101,8 @@ enum class LoaderStyle {
     Wave,
     Ripple,
     ZigZag,
-    ScaleDots
+    ScaleDots,
+    Custom // For user-provided custom loaders
 }
 
 /**
@@ -164,5 +206,60 @@ fun Loader(
             modifier,
             config // BaseLoaderConfig is sufficient
         )
+
+        LoaderStyle.Custom -> {
+            if (config is CustomLoaderConfig) {
+                when (config.type) {
+                    CustomLoaderType.LOTTIE -> {
+                        val composition by rememberLottieComposition(
+                            LottieCompositionSpec.RawRes(config.resource as Int)
+                        )
+                        LottieAnimation(
+                            composition = composition,
+                            iterations = LottieConstants.IterateForever,
+                            modifier = modifier.size(config.size)
+                        )
+                    }
+
+                    CustomLoaderType.SVG,
+                    CustomLoaderType.GIF -> {
+                        CustomLoader(config, modifier)
+                    }
+                }
+            } else {
+                Text(
+                    text = "CustomLoaderConfig required for LoaderStyle.Custom",
+                    modifier = modifier
+                )
+            }
+        }
     }
+}
+
+
+@Composable
+fun CustomLoader(config: CustomLoaderConfig, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                add(SvgDecoder.Factory())
+                add(GifDecoder.Factory())
+            }
+            .build()
+    }
+
+    val painter = rememberAsyncImagePainter(
+        model = Builder(context)
+            .data(config.resource)
+            .build(),
+        imageLoader = imageLoader
+    )
+
+    Image(
+        painter = painter,
+        contentDescription = "Custom Loader",
+        modifier = modifier.size(config.size)
+    )
 }

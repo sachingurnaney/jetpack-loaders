@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.sachingurnaney.jetpackloaders.*
 import io.github.sachingurnaney.jetpackloaders.sample.LoaderItem
+import io.github.sachingurnaney.jetpackloaders.sample.R
 import io.github.sachingurnaney.jetpackloaders.sample.allLoaderItems
 
 @Composable
@@ -51,15 +52,23 @@ fun LoaderCard(item: LoaderItem, onClick: () -> Unit) {
     }
 }
 
-// Returns a default config instance based on loader type
+// Returns actual loader configs (used in Loader())
 fun getDefaultConfig(style: LoaderStyle): BaseLoaderConfig {
     return when (style) {
         LoaderStyle.Spinner, LoaderStyle.Ring, LoaderStyle.Ripple ->
             RingLoaderConfig()
+
         LoaderStyle.Dots, LoaderStyle.ScaleDots, LoaderStyle.Wave,
         LoaderStyle.Bars, LoaderStyle.Orbit, LoaderStyle.ZigZag ->
             ElementLoaderConfig()
+
         LoaderStyle.Pulse ->
             BaseLoaderConfig()
+
+        LoaderStyle.Custom ->
+            CustomLoaderConfig(
+                type = CustomLoaderType.LOTTIE,
+                resource = R.raw.dots
+            )
     }
 }

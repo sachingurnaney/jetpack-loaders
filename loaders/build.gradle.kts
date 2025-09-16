@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("maven-publish")
 }
 
 android {
@@ -50,4 +51,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Lottie for animations
+    implementation(libs.lottie.compose)
+
+    // Coil for async image loading (SVG, GIF, WebP, etc.)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.svg)
 }

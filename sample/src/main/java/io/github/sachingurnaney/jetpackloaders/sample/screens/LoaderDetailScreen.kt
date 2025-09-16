@@ -4,18 +4,21 @@ package io.github.sachingurnaney.jetpackloaders.sample.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,12 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.sachingurnaney.jetpackloaders.BaseLoaderConfig
+import io.github.sachingurnaney.jetpackloaders.CustomLoaderConfig
+import io.github.sachingurnaney.jetpackloaders.CustomLoaderType
 import io.github.sachingurnaney.jetpackloaders.ElementLoaderConfig
 import io.github.sachingurnaney.jetpackloaders.Loader
 import io.github.sachingurnaney.jetpackloaders.LoaderStyle
 import io.github.sachingurnaney.jetpackloaders.RingLoaderConfig
+import io.github.sachingurnaney.jetpackloaders.sample.R
 import io.github.sachingurnaney.jetpackloaders.sample.allLoaderItems
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoaderDetailScreen(styleName: String) {
@@ -45,65 +50,44 @@ fun LoaderDetailScreen(styleName: String) {
         return
     }
 
-    // Default configuration
-    val defaultConfig = remember(item.style) { mutableStateOf(getDefaultValues(item.style)) }
+    val defaults = getDefaultValues(item.style)
 
-    // State for configuration
-    var size by remember { mutableFloatStateOf(defaultConfig.value.size) }
-    var speed by remember { mutableFloatStateOf(defaultConfig.value.speed) }
-    var red by remember { mutableFloatStateOf(defaultConfig.value.red) }
-    var green by remember { mutableFloatStateOf(defaultConfig.value.green) }
-    var blue by remember { mutableFloatStateOf(defaultConfig.value.blue) }
-    var gap by remember { mutableFloatStateOf(defaultConfig.value.gap) }
-    var elementSize by remember { mutableFloatStateOf(defaultConfig.value.elementSize) }
-    var strokeWidth by remember { mutableFloatStateOf(defaultConfig.value.strokeWidth) }
-    var minStroke by remember { mutableFloatStateOf(defaultConfig.value.minStroke) }
-    var maxStroke by remember { mutableFloatStateOf(defaultConfig.value.maxStroke) }
+    var size by remember { mutableFloatStateOf(defaults.size) }
+    var speed by remember { mutableFloatStateOf(defaults.speed) }
+    var red by remember { mutableFloatStateOf(defaults.red) }
+    var green by remember { mutableFloatStateOf(defaults.green) }
+    var blue by remember { mutableFloatStateOf(defaults.blue) }
+    var gap by remember { mutableFloatStateOf(defaults.gap) }
+    var elementSize by remember { mutableFloatStateOf(defaults.elementSize) }
+    var strokeWidth by remember { mutableFloatStateOf(defaults.strokeWidth) }
+    var minStroke by remember { mutableFloatStateOf(defaults.minStroke) }
+    var maxStroke by remember { mutableFloatStateOf(defaults.maxStroke) }
+
+    var customType by remember { mutableStateOf(CustomLoaderType.LOTTIE) }
 
     val color = Color(red / 255f, green / 255f, blue / 255f)
 
+    val scrollState = rememberScrollState()
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(item.displayName) },
-                actions = {
-                    TextButton(onClick = {
-                        // Reset all values to default
-                        size = defaultConfig.value.size
-                        speed = defaultConfig.value.speed
-                        red = defaultConfig.value.red
-                        green = defaultConfig.value.green
-                        blue = defaultConfig.value.blue
-                        gap = defaultConfig.value.gap
-                        elementSize = defaultConfig.value.elementSize
-                        strokeWidth = defaultConfig.value.strokeWidth
-                        minStroke = defaultConfig.value.minStroke
-                        maxStroke = defaultConfig.value.maxStroke
-                    }) {
-                        Text("Reset")
-                    }
-                }
-            )
-        }
+        topBar = { TopAppBar(title = { Text(item.displayName) }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState()) // Make it scrollable
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(16.dp)
         ) {
-            // Preview Area
+            // --- Top Half: Loader Preview ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp), // fixed height for visibility
+                    .weight(0.5f),
                 contentAlignment = Alignment.Center
             ) {
                 val config: BaseLoaderConfig = when (item.style) {
                     LoaderStyle.Dots, LoaderStyle.ScaleDots, LoaderStyle.Wave,
-                    LoaderStyle.Bars, LoaderStyle.Orbit, LoaderStyle.ZigZag -> {
+                    LoaderStyle.Bars, LoaderStyle.Orbit, LoaderStyle.ZigZag ->
                         ElementLoaderConfig(
                             size = size.dp,
                             speed = speed,
@@ -111,9 +95,8 @@ fun LoaderDetailScreen(styleName: String) {
                             elementSize = elementSize.dp,
                             gap = gap.dp
                         )
-                    }
 
-                    LoaderStyle.Spinner, LoaderStyle.Ring, LoaderStyle.Ripple -> {
+                    LoaderStyle.Spinner, LoaderStyle.Ring, LoaderStyle.Ripple ->
                         RingLoaderConfig(
                             size = size.dp,
                             speed = speed,
@@ -122,23 +105,34 @@ fun LoaderDetailScreen(styleName: String) {
                             minStrokeWidth = minStroke.dp,
                             maxStrokeWidth = maxStroke.dp
                         )
-                    }
 
-                    LoaderStyle.Pulse -> {
-                        BaseLoaderConfig(
+                    LoaderStyle.Pulse ->
+                        BaseLoaderConfig(size = size.dp, speed = speed, color = color)
+
+                    LoaderStyle.Custom ->
+                        CustomLoaderConfig(
                             size = size.dp,
                             speed = speed,
-                            color = color
+                            type = customType,
+                            resource = when (customType) {
+                                CustomLoaderType.LOTTIE -> R.raw.dots
+                                CustomLoaderType.GIF -> "https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+                                CustomLoaderType.SVG -> R.drawable.loader
+                            }
                         )
-                    }
                 }
 
                 Loader(style = item.style, config = config)
             }
 
-            // Controls
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Bottom Half: Controls with Scroll ---
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.5f)
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text("Size: ${size.toInt()} dp")
@@ -146,11 +140,6 @@ fun LoaderDetailScreen(styleName: String) {
 
                 Text("Speed: ${"%.1f".format(speed)}x")
                 Slider(value = speed, onValueChange = { speed = it }, valueRange = 0.2f..3f)
-
-                Text("Color")
-                ColorSlider("Red", red) { red = it }
-                ColorSlider("Green", green) { green = it }
-                ColorSlider("Blue", blue) { blue = it }
 
                 if (item.style in listOf(
                         LoaderStyle.Dots, LoaderStyle.ScaleDots, LoaderStyle.Wave,
@@ -173,6 +162,33 @@ fun LoaderDetailScreen(styleName: String) {
 
                     Text("Max Stroke: ${maxStroke.toInt()} dp")
                     Slider(value = maxStroke, onValueChange = { maxStroke = it }, valueRange = 1f..16f)
+                }
+
+                if (item.style != LoaderStyle.Custom) {
+                    Text("Color")
+                    ColorSlider("Red", red) { red = it }
+                    ColorSlider("Green", green) { green = it }
+                    ColorSlider("Blue", blue) { blue = it }
+                }
+
+                if (item.style == LoaderStyle.Custom) {
+                    Text("Custom Loader Type")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        CustomLoaderType.values().forEach { type ->
+                            Button(
+                                onClick = { customType = type },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (customType == type) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.secondary
+                                )
+                            ) {
+                                Text(type.name)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -225,6 +241,14 @@ fun getDefaultValues(style: LoaderStyle): LoaderDefaultValues {
                 green = 0f,
                 blue = 238f
             )
+
+        LoaderStyle.Custom ->LoaderDefaultValues(
+            size = 96f,
+            speed = 1f,
+            red = 0f,
+            green = 0f,
+            blue = 0f
+        )
     }
 }
 

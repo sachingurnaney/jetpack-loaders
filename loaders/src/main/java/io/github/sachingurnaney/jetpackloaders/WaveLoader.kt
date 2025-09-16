@@ -17,25 +17,32 @@ fun WaveLoader(modifier: Modifier = Modifier, config: ElementLoaderConfig = Elem
         infiniteTransition.animateFloat(
             0.3f, 1f,
             animationSpec = infiniteRepeatable(
-                tween((600 / config.speed).toInt(), delayMillis = (index * 100 / config.speed).toInt()),
+                tween(
+                    durationMillis = (600 / config.speed).toInt(),
+                    delayMillis = (index * 100 / config.speed).toInt()
+                ),
                 RepeatMode.Reverse
             ),
             label = "wave$index"
         ).value
     }
 
-    Row(
-        modifier = modifier.width(config.size),
-        horizontalArrangement = Arrangement.spacedBy(config.gap),
-        verticalAlignment = Alignment.CenterVertically
+    Box(
+        modifier = modifier.size(config.size),
+        contentAlignment = Alignment.Center
     ) {
-        scales.forEach { scale ->
-            Box(
-                modifier = Modifier
-                    .size(width = config.elementSize, height = config.size / 2)
-                    .graphicsLayer { scaleY = scale }
-                    .background(config.color, RoundedCornerShape(2.dp))
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(config.gap),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            scales.forEach { scale ->
+                Box(
+                    modifier = Modifier
+                        .size(width = config.elementSize, height = config.size / 2)
+                        .graphicsLayer { scaleY = scale }
+                        .background(config.color, RoundedCornerShape(2.dp))
+                )
+            }
         }
     }
 }

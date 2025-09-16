@@ -17,5 +17,6 @@ val allLoaderItems = listOf(
     LoaderItem(LoaderStyle.Wave, "Wave"),
     LoaderItem(LoaderStyle.Ripple, "Ripple"),
     LoaderItem(LoaderStyle.ZigZag, "ZigZag"),
-    LoaderItem(LoaderStyle.ScaleDots, "Scale Dots")
+    LoaderItem(LoaderStyle.ScaleDots, "Scale Dots"),
+    LoaderItem(LoaderStyle.Custom, "Lottie Dots")
 )
